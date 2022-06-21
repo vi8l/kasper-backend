@@ -1,6 +1,8 @@
 import { Request, RequestHandler, Response } from "express";
 import { PeopleModel } from "../model/people.model";
 import { PeopleService } from "../service/index";
+import CustomExceptionError from "../error/custom-exception.error";
+import { CustomResponseModel } from "../model/custom-response.model";
 
 export class PeopleController {
   public peopleService: PeopleService = new PeopleService();
@@ -10,8 +12,10 @@ export class PeopleController {
    */
   public async getPeoples() {
     try {
-      return await this.peopleService.getPeoples();
-    } catch (error) {}
+      return this.peopleService.getPeoples();
+    } catch (error) {
+      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    }
   }
 
   /**
@@ -21,8 +25,11 @@ export class PeopleController {
    */
   public async getPersonByID(id: number) {
     try {
-      return this.peopleService.getPersonByID(id);
-    } catch (error) {}
+      const response = await this.peopleService.getPersonByID(id);
+      return response[0];
+    } catch (error) {
+      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    }
   }
 
   /**
@@ -42,15 +49,12 @@ export class PeopleController {
         name: req?.body?.name,
         sequence: maxID * 1024 || 1024,
       });
-      return this.peopleService.addPerson(person);
+      await this.peopleService.addPerson(person);
+      return new CustomResponseModel({
+        message: "Data added successfully.",
+      });
     } catch (error) {
-      console.log("results", error);
-    }
-  }
-
-  private async validateRequest(req: Request, update: boolean = false) {
-    if (!req?.body?.name || (update && !req?.params?.id)) {
-      throw new Error("Invalid request");
+      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
     }
   }
 
@@ -69,9 +73,11 @@ export class PeopleController {
         id: +id,
       });
       await this.peopleService.updatePersonNameById(person);
-      return "Success";
+      return new CustomResponseModel({
+        message: "Data updated successfully.",
+      });
     } catch (error) {
-      console.log(error)
+      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
     }
   }
 
@@ -85,11 +91,38 @@ export class PeopleController {
       this.validateRequest(req, true);
       const id = req.params.id;
       const sequenceNumber = this.getNewSquenceNumber(req);
-      console.log("sequenceNumber>>", sequenceNumber);
       await this.peopleService.updateOrderByID(+id, sequenceNumber);
       await this.reorderPeopleSequence(req, sequenceNumber);
-      return "Success";
-    } catch (error) {}
+      return new CustomResponseModel({
+        message: "Data updated successfully.",
+      });
+    } catch (error) {
+      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    }
+  }
+
+  /**
+   * deletes a person
+   *
+   * @param id Person ID
+   */
+  public async deletePersonById(id: number) {
+    try {
+      if (id) {
+        await this.peopleService.deletePerson(id);
+      }
+      return new CustomResponseModel({
+        message: "Data deleted successfully.",
+      });
+    } catch (error) {
+      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    }
+  }
+
+  private validateRequest(req: Request, update: boolean = false) {
+    if (!req?.body?.name || (update && !req?.params?.id)) {
+      throw new CustomExceptionError("Invalid request", "INVALID_REQUEST", 400);
+    }
   }
 
   /**
@@ -153,20 +186,8 @@ export class PeopleController {
         );
       }
       return;
-    } catch (error) {}
-  }
-
-  /**
-   * deletes a person
-   *
-   * @param id Person ID
-   */
-  public async deletePersonById(id: number) {
-    try {
-      if (id) {
-        await this.peopleService.deletePerson(id);
-      }
-      return "Success";
-    } catch (error) {}
+    } catch (error) {
+      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    }
   }
 }

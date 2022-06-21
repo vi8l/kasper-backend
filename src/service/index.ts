@@ -21,7 +21,7 @@ export class PeopleService {
    * GET a Person by ID
    */
   public async getPersonByID(id: number) {
-    return execute<PeopleModel>(PeoplesQueries.GetPersonById, [id]);
+    return execute<PeopleModel[]>(PeoplesQueries.GetPersonById, [id]);
   }
 
   /**
@@ -67,7 +67,11 @@ export class PeopleService {
   /**
    * UPDATE order by ID
    */
-   public async updateOrderByID(id: number, sequence: number) {
-    return execute<PeopleModel[]>(PeoplesQueries.UpdateOrderByID, [sequence, id]);
+  public async updateOrderByID(id: number, sequence: number) {
+    const result = await execute<{ affectedRows: number }>(
+      PeoplesQueries.UpdateOrderByID,
+      [sequence, id]
+    );
+    return result.affectedRows > 0;
   }
 }
