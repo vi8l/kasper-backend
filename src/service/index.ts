@@ -38,10 +38,10 @@ export class PeopleService {
   /**
    * UPDATE person information
    */
-  public async updatePerson(peopleModel: PeopleModel) {
+  public async updatePersonNameById(peopleModel: PeopleModel) {
     const result = await execute<{ affectedRows: number }>(
-      PeoplesQueries.UpdatePersonById,
-      [peopleModel.name, peopleModel.sequence]
+      PeoplesQueries.UpdatePersonNameById,
+      [peopleModel.name, peopleModel.id]
     );
     return result.affectedRows > 0;
   }

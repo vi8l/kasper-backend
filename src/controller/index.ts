@@ -37,13 +37,15 @@ export class PeopleController {
       // if there is no data in the table, return 0
       const results = await this.peopleService.getMaxID();
 
-      const maxID = results[0].max_index_number;
+      const maxID = results[0].max_index_number + 1;
       const person = new PeopleModel({
         name: req?.body?.name,
         sequence: maxID * 1024 || 1024,
       });
       return this.peopleService.addPerson(person);
-    } catch (error) {}
+    } catch (error) {
+      console.log("results", error);
+    }
   }
 
   private async validateRequest(req: Request, update: boolean = false) {
@@ -66,9 +68,11 @@ export class PeopleController {
         sequence: req.body.sequence,
         id: +id,
       });
-      await this.peopleService.updatePerson(person);
+      await this.peopleService.updatePersonNameById(person);
       return "Success";
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   /**
@@ -81,6 +85,7 @@ export class PeopleController {
       this.validateRequest(req, true);
       const id = req.params.id;
       const sequenceNumber = this.getNewSquenceNumber(req);
+      console.log("sequenceNumber>>", sequenceNumber);
       await this.peopleService.updateOrderByID(+id, sequenceNumber);
       await this.reorderPeopleSequence(req, sequenceNumber);
       return "Success";

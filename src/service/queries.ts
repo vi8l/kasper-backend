@@ -33,10 +33,9 @@ export const PeoplesQueries = {
       VALUES (?, ?);
     `,
 
-  UpdatePersonById: `
+  UpdatePersonNameById: `
     UPDATE kasper_assignment.people
-    SET name = ?,
-        sequence = ?
+    SET name = ?
     WHERE
       id = ?
     `,
