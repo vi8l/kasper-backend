@@ -5,23 +5,27 @@ import { PeopleController } from "../controller";
 const peopleController = new PeopleController();
 const router = Router();
 
-router.get("/user", async (request: Request, response: Response) => {
+router.get("/people", async (request: Request, response: Response) => {
     response.send(await peopleController.getPeoples())
 });
 
-router.get("/user/:id", async (request: Request, response: Response) => {
-    response.send(await peopleController.getPersonById(+request.params.id))
+router.get("/people/:id", async (request: Request, response: Response) => {
+    response.send(await peopleController.getPersonByID(+request.params.id))
 });
 
-router.post("/user", async (request: Request, response: Response) => {
-    response.sendStatus(200).send(await peopleController.addPerson(request))
+router.post("/people", async (request: Request, response: Response) => {
+    response.send(await peopleController.addPerson(request))
 });
 
-router.post("/user/:id", async (request: Request, response: Response) => {
-    response.send(await peopleController.updatePersonById(request))
+router.put("/people/:id", async (request: Request, response: Response) => {
+    response.send(await peopleController.updatePersonNameById(request))
 });
 
-router.delete("/user/:id", async (request: Request, response: Response) => {
+router.put("/people/sequence/:id", async (request: Request, response: Response) => {
+    response.send(await peopleController.updateOrderByID(request))
+});
+
+router.delete("/people/:id", async (request: Request, response: Response) => {
     response.send(await peopleController.deletePersonById(+request.params.id))
 });
 

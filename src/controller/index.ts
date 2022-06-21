@@ -1,16 +1,17 @@
 import { Request, RequestHandler, Response } from "express";
 import { PeopleModel } from "../model/people.model";
+import { PeopleService } from "../service/index";
 
 export class PeopleController {
-  public static PEOPLES: Array<PeopleModel> = [
-    { id: 1, name: "Default User", sequence: 1 },
-  ];
+  public peopleService: PeopleService = new PeopleService();
 
   /**
    * Get all PEOPLES records
    */
   public async getPeoples() {
-    return PeopleController.PEOPLES;
+    try {
+      return await this.peopleService.getPeoples();
+    } catch (error) {}
   }
 
   /**
@@ -18,42 +19,136 @@ export class PeopleController {
    *
    * @param id person ID
    */
-  public async getPersonById(id: number) {
-    return PeopleController.PEOPLES.find((person) => person.id === id);
+  public async getPersonByID(id: number) {
+    try {
+      return this.peopleService.getPersonByID(id);
+    } catch (error) {}
   }
 
   /**
    * Inserts a new person record
-   *
+   * Set sequence value to MaxID * 1024 into VALUES
    * @param req Express Request
    */
   public async addPerson(req: Request) {
-    const lastPersonIndex = PeopleController.PEOPLES.length - 1;
-    const lastId = PeopleController.PEOPLES[lastPersonIndex].id;
-    const id = lastId + 1;
-    const newPerson = new PeopleModel({
-      id,
-      sequence: id,
-      name: req.body.name,
-    });
-    return PeopleController.PEOPLES.push(newPerson);
+    try {
+      this.validateRequest(req);
+
+      // if there is no data in the table, return 0
+      const results = await this.peopleService.getMaxID();
+
+      const maxID = results[0].max_index_number;
+      const person = new PeopleModel({
+        name: req?.body?.name,
+        sequence: maxID * 1024 || 1024,
+      });
+      return this.peopleService.addPerson(person);
+    } catch (error) {}
+  }
+
+  private async validateRequest(req: Request, update: boolean = false) {
+    if (!req?.body?.name || (update && !req?.params?.id)) {
+      throw new Error("Invalid request");
+    }
   }
 
   /**
-   * Updates existing person record
+   * Updates existing person name
    *
    * @param req
    */
-  public async updatePersonById(req: Request) {
-    const currentPerson = PeopleController.PEOPLES.find(
-      (person) => person.id === +req.params.id
-    );
-    if (currentPerson) {
-      currentPerson.name = req.body.name || currentPerson.name;
-      currentPerson.sequence = req.body.sequence || currentPerson.sequence;
-      return { success: true };
+  public async updatePersonNameById(req: Request) {
+    try {
+      this.validateRequest(req, true);
+      const id = req.params.id;
+      const person = new PeopleModel({
+        name: req.body.name,
+        sequence: req.body.sequence,
+        id: +id,
+      });
+      await this.peopleService.updatePerson(person);
+      return "Success";
+    } catch (error) {}
+  }
+
+  /**
+   * Updates existing person order
+   *
+   * @param req
+   */
+  public async updateOrderByID(req: Request) {
+    try {
+      this.validateRequest(req, true);
+      const id = req.params.id;
+      const sequenceNumber = this.getNewSquenceNumber(req);
+      await this.peopleService.updateOrderByID(+id, sequenceNumber);
+      await this.reorderPeopleSequence(req, sequenceNumber);
+      return "Success";
+    } catch (error) {}
+  }
+
+  /**
+   * prevSequenceNumber: sequence of the above person, could be undefined
+   * nextSequenceNumber: sequence of the below person, could be undefined
+   *
+   * prevSequenceNumber === undefined ? (nextSequenceNumber-(nextSequenceNumber/2))
+   * nextSequenceNumber === undefined ? (prevSequenceNumber + (prevSequenceNumber/2))
+   * currSequenceNumber = (prevSequenceNumber + nextSequenceNumber)/2
+   * @param req
+   */
+
+  private getNewSquenceNumber(req: Request) {
+    let prevSequenceNumber = req.body.prevSequenceNumber;
+    let nextSequenceNumber = req.body.nextSequenceNumber;
+    let currSequenceNumber;
+
+    if (prevSequenceNumber === undefined) {
+      currSequenceNumber = Math.floor(
+        nextSequenceNumber - nextSequenceNumber / 2
+      );
+    } else if (nextSequenceNumber === undefined) {
+      currSequenceNumber = Math.floor(
+        prevSequenceNumber + prevSequenceNumber / 2
+      );
+    } else {
+      currSequenceNumber = Math.floor(
+        (prevSequenceNumber + nextSequenceNumber) / 2
+      );
     }
-    return "No person found";
+    return currSequenceNumber;
+  }
+
+  /**
+   * If sequence number ovelaps ?
+   * Get all sequence number in ascending order from 1~ (= newSequence), then update the table
+   * (newSequence*1024)
+   * @param req
+   * @param currSequenceNumber
+   * @returns
+   */
+  private async reorderPeopleSequence(
+    req: Request,
+    currSequenceNumber: number
+  ) {
+    try {
+      const prevSequenceNumber = req.body.prevSequenceNumber;
+      const nextSequenceNumber = req.body.nextSequenceNumber;
+      if (
+        Math.abs(currSequenceNumber - prevSequenceNumber) <= 1 ||
+        Math.abs(currSequenceNumber - nextSequenceNumber) <= 1
+      ) {
+        const orderedData = await this.peopleService.getOrderedData();
+        await Promise.all(
+          orderedData.map(async (person: { [key: string]: any }) => {
+            await this.peopleService.updateOrderByID(
+              person.id,
+              person.newSequence * 1024
+            );
+          })
+        );
+      }
+      return;
+    } catch (error) {}
   }
 
   /**
@@ -62,10 +157,11 @@ export class PeopleController {
    * @param id Person ID
    */
   public async deletePersonById(id: number) {
-    const personIndex = PeopleController.PEOPLES.findIndex(
-      (person) => person.id === id
-    );
-    PeopleController.PEOPLES.splice(personIndex, 1);
-    return PeopleController.PEOPLES;
+    try {
+      if (id) {
+        await this.peopleService.deletePerson(id);
+      }
+      return "Success";
+    } catch (error) {}
   }
 }

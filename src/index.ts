@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import publicRoutes from './routes';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import * as MySQLConnector from './utils/mysql.connector';
 
@@ -9,9 +10,10 @@ const app: Express = express();
 const port = process.env.PORT;
 
 // create database pool
-// MySQLConnector.init();
+MySQLConnector.init();
 
 // parse incoming request body and append data to `req.body`
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.get('/', (req: Request, res: Response) => {

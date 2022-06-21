@@ -1,6 +1,6 @@
 
 export class PeopleModel {
-    public id: number;
+    public id?: number;
     public name: string;
     public sequence: number
 
@@ -12,7 +12,7 @@ export class PeopleModel {
 }
 
 export interface PeopleModelArgs {
-    id: number;
+    id?: number;
     name: string;
     sequence: number;
 
