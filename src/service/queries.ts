@@ -49,9 +49,11 @@ export const PeoplesQueries = {
     `,
 
   GetOrderedData: `
+    SET @row_number = 0;
     SELECT *,
-      ROW_NUMBER() OVER (ORDER BY sequence) as newSequence 
-      FROM ${db_name}.people
+        (@row_number:=@row_number + 1) AS newSequence
+    FROM
+    ${db_name}.people
       `,
 
   UpdateOrderByID: `
