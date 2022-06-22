@@ -48,13 +48,7 @@ export const PeoplesQueries = {
       id = ?
     `,
 
-  GetOrderedData: `
-    SET @row_number = 0;
-    SELECT *,
-        (@row_number:=@row_number + 1) AS newSequence
-    FROM
-    ${db_name}.people
-      `,
+  GetOrderedData: `SET @row_number = 0;SELECT *, (@row_number:=@row_number + 1) AS newSequence FROM ${db_name}.people`,
 
   UpdateOrderByID: `
     UPDATE ${db_name}.people
