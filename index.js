@@ -33,7 +33,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const MySQLConnector = __importStar(require("./utils/mysql.connector"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 // create database pool
 MySQLConnector.init();
 // parse incoming request body and append data to `req.body`
