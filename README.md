@@ -2,9 +2,15 @@
 This is API part of assignment to show Peoples table with CRUD operations and reordering rows;
 Stack was expected to be REACT/NODE/TS/MYSQL
 
-SQL script required for App: /src/scripts/create_schema.sql
+## Database Setup
+We will need SQL schema to save our data. 
+Open SQL Server on you system and execute below mentioned script.
 
-add .env file at root with below values:
+SQL script required for App: `/src/scripts/create_schema.sql`
+
+## ENV Variables
+After executing script successfully, please create `.env` file at root folder and add below values:
+
 PORT=8000
 MY_SQL_DB_HOST=
 MY_SQL_DB_USER=

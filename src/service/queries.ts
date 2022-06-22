@@ -1,10 +1,12 @@
+import { DB_CONFIGS } from '../configs/db_configs';
+const db_name = DB_CONFIGS.mySqlDbConfigs.DB_DATABASE;
 export const PeoplesQueries = {
   GetPeoples: `
     SELECT
       id,
         name,
         sequence
-    FROM kasper_assignment.people as p 
+    FROM ${db_name}.people as p 
     ORDER BY sequence ASC
     `,
 
@@ -13,7 +15,7 @@ export const PeoplesQueries = {
      IFNULL(
       (SELECT
          id 
-      FROM kasper_assignment.people as p 
+      FROM ${db_name}.people as p 
       ORDER BY id DESC LIMIT 1),
      0) as max_index_number
     `,
@@ -23,25 +25,25 @@ export const PeoplesQueries = {
       id,
         name,
         sequence
-    FROM kasper_assignment.people as p
+    FROM ${db_name}.people as p
     WHERE
       id = ?
     `,
 
   AddPerson: `
-    INSERT INTO kasper_assignment.people (name, sequence)
+    INSERT INTO ${db_name}.people (name, sequence)
       VALUES (?, ?);
     `,
 
   UpdatePersonNameById: `
-    UPDATE kasper_assignment.people
+    UPDATE ${db_name}.people
     SET name = ?
     WHERE
       id = ?
     `,
 
   DeletePersonById: `
-    DELETE from kasper_assignment.people
+    DELETE from ${db_name}.people
     WHERE
       id = ?
     `,
@@ -49,11 +51,11 @@ export const PeoplesQueries = {
   GetOrderedData: `
     SELECT *,
       ROW_NUMBER() OVER (ORDER BY sequence) as newSequence 
-      FROM kasper_assignment.people
+      FROM ${db_name}.people
       `,
 
   UpdateOrderByID: `
-    UPDATE kasper_assignment.people
+    UPDATE ${db_name}.people
     SET sequence = ?
     WHERE
       id = ?
