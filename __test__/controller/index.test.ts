@@ -198,14 +198,17 @@ describe("People CRUD Operations:", () => {
       controllerUT.peopleService.updateOrderByID = jest
         .fn()
         .mockResolvedValue(true);
-      controllerUT.peopleService.getOrderedData = jest
+        controllerUT.peopleService.getPeoples = jest
         .fn()
         .mockResolvedValue(peopleData);
+      // controllerUT.peopleService.getOrderedData = jest
+      //   .fn()
+      //   .mockResolvedValue(peopleData);
       const result = await controllerUT.updateOrderByID(
         reorderSequenceReq as unknown as Request
       );
       expect(result).toStrictEqual(updatePersonResponse);
-      expect(controllerUT.peopleService.getOrderedData).toBeCalled();
+      expect(controllerUT.peopleService.getPeoples).toBeCalled();
       // first updateOrderByID will be called to update requested record (1) + then reorder all records (peopleData.length)
       expect(controllerUT.peopleService.updateOrderByID).toBeCalledTimes(
         peopleData.length + 1

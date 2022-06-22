@@ -243,14 +243,16 @@ export class PeopleController {
         Math.abs(currSequenceNumber - prevSequenceNumber) <= 1 ||
         Math.abs(currSequenceNumber - nextSequenceNumber) <= 1
       ) {
-        const orderedData = await this.peopleService.getOrderedData();
+        const orderedData = await this.peopleService.getPeoples();
         await Promise.all(
-          orderedData.map(async (person: { [key: string]: any }) => {
-            await this.peopleService.updateOrderByID(
-              person.id,
-              person.newSequence * 1024
-            );
-          })
+          orderedData.map(
+            async (person: { [key: string]: any }, key: number) => {
+              await this.peopleService.updateOrderByID(
+                person.id,
+                (key + 1) * 1024
+              );
+            }
+          )
         );
       }
       return;
