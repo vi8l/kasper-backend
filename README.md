@@ -27,6 +27,12 @@ run `npm i` to install dependencies
 
 In the project directory, you can run:
 
+### `npm run test`
+
+Runs the test cases locally.\
+You can also check the detailed report in coverage folder.
+If you open the index.html in the browser then you will get the result for each file code coverage.
+
 ### `npm run start`
 
 Runs the app locally in the development mode.\

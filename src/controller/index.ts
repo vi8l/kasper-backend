@@ -13,8 +13,12 @@ export class PeopleController {
   public async getPeoples() {
     try {
       return this.peopleService.getPeoples();
-    } catch (error) {
-      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    } catch (error: any) {
+      throw new CustomExceptionError(
+        error.message || "",
+        error?.errorCode || "INVALID_REQUEST",
+        error?.httpStatus || 400
+      );
     }
   }
 
@@ -26,9 +30,20 @@ export class PeopleController {
   public async getPersonByID(id: number) {
     try {
       const response = await this.peopleService.getPersonByID(id);
+      if (!response || response.length <= 0) {
+        throw new CustomExceptionError(
+          "Person not found",
+          "NOT_FOUND_ERROR",
+          404
+        );
+      }
       return response[0];
-    } catch (error) {
-      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    } catch (error: any) {
+      throw new CustomExceptionError(
+        error.message || "",
+        error?.errorCode || "INVALID_REQUEST",
+        error?.httpStatus || 400
+      );
     }
   }
 
@@ -49,12 +64,23 @@ export class PeopleController {
         name: req?.body?.name,
         sequence: maxID * 1024 || 1024,
       });
-      await this.peopleService.addPerson(person);
+      const result = await this.peopleService.addPerson(person);
+      if (!result) {
+        throw new CustomExceptionError(
+          "Can not add person",
+          "INVALID_REQUEST",
+          400
+        );
+      }
       return new CustomResponseModel({
         message: "Data added successfully.",
       });
-    } catch (error) {
-      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    } catch (error: any) {
+      throw new CustomExceptionError(
+        error.message || "",
+        error?.errorCode || "INVALID_REQUEST",
+        error?.httpStatus || 400
+      );
     }
   }
 
@@ -72,12 +98,24 @@ export class PeopleController {
         sequence: req.body.sequence,
         id: +id,
       });
-      await this.peopleService.updatePersonNameById(person);
+      const result = await this.peopleService.updatePersonNameById(person);
+      if (!result) {
+        throw new CustomExceptionError(
+          "Person not found",
+          "NOT_FOUND_ERROR",
+          404
+        );
+      }
+
       return new CustomResponseModel({
         message: "Data updated successfully.",
       });
-    } catch (error) {
-      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    } catch (error: any) {
+      throw new CustomExceptionError(
+        error.message || "",
+        error?.errorCode || "INVALID_REQUEST",
+        error?.httpStatus || 400
+      );
     }
   }
 
@@ -91,13 +129,27 @@ export class PeopleController {
       this.validateRequest(req, true);
       const id = req.params.id;
       const sequenceNumber = this.getNewSquenceNumber(req);
-      await this.peopleService.updateOrderByID(+id, sequenceNumber);
+      const result = await this.peopleService.updateOrderByID(
+        +id,
+        sequenceNumber
+      );
+      if (!result) {
+        throw new CustomExceptionError(
+          "Person not found",
+          "NOT_FOUND_ERROR",
+          404
+        );
+      }
       await this.reorderPeopleSequence(req, sequenceNumber);
       return new CustomResponseModel({
         message: "Data updated successfully.",
       });
-    } catch (error) {
-      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    } catch (error: any) {
+      throw new CustomExceptionError(
+        error.message || "",
+        error?.errorCode || "INVALID_REQUEST",
+        error?.httpStatus || 400
+      );
     }
   }
 
@@ -108,14 +160,30 @@ export class PeopleController {
    */
   public async deletePersonById(id: number) {
     try {
-      if (id) {
-        await this.peopleService.deletePerson(id);
+      if (!id) {
+        throw new CustomExceptionError(
+          "Invalid request",
+          "INVALID_REQUEST",
+          400
+        );
+      }
+      const result = await this.peopleService.deletePerson(id);
+      if (!result) {
+        throw new CustomExceptionError(
+          "Person not found",
+          "NOT_FOUND_ERROR",
+          404
+        );
       }
       return new CustomResponseModel({
         message: "Data deleted successfully.",
       });
-    } catch (error) {
-      throw new CustomExceptionError(error as string, "INVALID_REQUEST", 400);
+    } catch (error: any) {
+      throw new CustomExceptionError(
+        error.message || "",
+        error?.errorCode || "INVALID_REQUEST",
+        error?.httpStatus || 400
+      );
     }
   }
 
