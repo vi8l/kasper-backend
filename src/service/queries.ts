@@ -31,7 +31,7 @@ export const PeoplesQueries = {
     `,
 
   AddPerson: `
-    SET auto_increment_increment = 1; SET auto_increment_offset = 1; INSERT INTO ${db_name}.people (name, sequence)
+    INSERT INTO ${db_name}.people (name, sequence)
       VALUES (?, ?);
     `,
 
