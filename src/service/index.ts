@@ -58,13 +58,6 @@ export class PeopleService {
   }
 
   /**
-   * GET ordered data
-   */
-  public async getOrderedData() {
-    return execute<PeopleModel[]>(PeoplesQueries.GetOrderedData, []);
-  }
-
-  /**
    * UPDATE order by ID
    */
   public async updateOrderByID(id: number, sequence: number) {
