@@ -31,7 +31,7 @@ export const PeoplesQueries = {
     `,
 
   AddPerson: `
-    INSERT INTO ${db_name}.people (name, sequence)
+    SET auto_increment_increment = 1; SET auto_increment_offset = 1; INSERT INTO ${db_name}.people (name, sequence)
       VALUES (?, ?);
     `,
 
@@ -47,8 +47,6 @@ export const PeoplesQueries = {
     WHERE
       id = ?
     `,
-
-  GetOrderedData: `SET @row_number = 0;SELECT *, (@row_number:=@row_number + 1) AS newSequence FROM ${db_name}.people`,
 
   UpdateOrderByID: `
     UPDATE ${db_name}.people
